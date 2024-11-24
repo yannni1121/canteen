@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点外卖页面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .header a:hover {
+            text-decoration: underline;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .food-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .food-item img {
+            float: left;
+            margin-right: 20px;
+            max-width: 150px;
+            height: auto;
+        }
+
+        .food-info {
+            overflow: hidden;
+        }
+
+        .food-info h2 {
+            margin: 0 0 10px;
+        }
+
+        .food-info p {
+            margin: 0 0 10px;
+            color: #555;
+        }
+
+        .food-info .price {
+            font-weight: bold;
+            color: #f50;
+        }
+
+        .add-to-cart {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .add-to-cart:hover {
+            background-color: #218838;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: right;
+        }
+
+        .cart-summary {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .checkout-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .checkout-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 清除浮动 */
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>客房叫餐</h1>
+        <a href="#">零食</a>
+        <a href="#">饮料</a>
+        <a href="#">酒水</a>
+        <a href="#">牛奶</a>
+		<a href="#">佳肴</a>
+    </div>
+
+    <div class="main-content clearfix">
+        <div class="food-item clearfix">
+            <img src="food1.jpg" alt="菜品图片1">
+            <div class="food-info">
+                <h2>菜品名称1</h2>
+                <p>描述一下这个菜品的特色和口感。</p>
+                <p class="price">¥XX.XX</p>
+                <button class="add-to-cart">加购</button>
+            </div>
+        </div>
+        <div class="food-item clearfix">
+            <img src="food2.jpg" alt="菜品图片2">
+            <div class="food-info">
+                <h2>菜品名称2</h2>
+                <p>描述一下这个菜品的特色和口感。</p>
+                <p class="price">¥XX.XX</p>
+                <button class="add-to-cart">加购</button>
+            </div>
+        </div>
+        <!-- 可以继续添加更多的菜品 -->
+    </div>
+
+    <div class="footer">
+            <div class="cart-summary">
+                <span id="cart-count">购物车 (0)</span>
+            </div>
+            <button class="checkout-button" onclick="checkout()">结账</button>
+        </div>
+
+    <script>
+       let cart = [];
+        
+               // 创建一个函数来添加商品到购物车
+               function addToCart(foodItem) {
+                   // 检查商品是否已经在购物车中
+                   let itemInCart = cart.find(item => item.name === foodItem.name);
+                   if (itemInCart) {
+                       // 如果商品已在购物车中，增加数量
+                       itemInCart.quantity++;
+                   } else {
+                       // 如果商品不在购物车中，添加到购物车
+                       cart.push({ ...foodItem, quantity: 1 });
+                   }
+                   // 更新购物车数量
+                   updateCartCount();
+                   // 计算总价（这里假设每个商品都有一个price属性）
+                   updateTotalPrice();
+               }
+        
+               // 创建一个函数来更新购物车数量
+               function updateCartCount() {
+                   document.getElementById('cart-count').textContent = `购物车 (${cart.length})`;
+               }
+        
+               // 创建一个函数来计算总价
+               function updateTotalPrice() {
+                   let totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                   // 这里只是打印总价到控制台，你可以根据需要显示它
+                   console.log(`总价: ¥${totalPrice.toFixed(2)}`);
+               }
+        
+               // 为每个加购按钮添加点击事件监听器
+               document.querySelectorAll('.add-to-cart').forEach(button => {
+                   button.addEventListener('click', (event) => {
+                       // 假设每个按钮旁边都有一个隐藏的input或data属性来存储商品信息
+                       // 这里为了简化，我们直接传递一个示例商品对象
+                       let foodItem = {
+                           name: event.target.closest('.food-item').querySelector('h2').textContent,
+                           // 这里需要一种方法来获取价格，例如通过data属性
+                           // price: parseFloat(event.target.closest('.food-item').querySelector('.price').textContent.replace('¥', ''))
+                           // 由于我们没有在HTML中设置data属性或价格输入，这里我们手动设置一个价格作为示例
+                           price: 50.00 // 假设每个菜品的价格是50元，实际中需要动态获取
+                       };
+                       addToCart(foodItem);
+                   });
+               });
+        
+               // 创建一个函数来处理结账
+               function checkout() {
+                   // 这里可以添加结账逻辑，例如跳转到结账页面或显示结账信息
+                   alert(`您即将结账，购物车中有 ${cart.length} 件商品，总价 ¥${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}`);
+                   // 重置购物车（可选）
+                   // cart = [];
+                   // updateCartCount();
+                   // updateTotalPrice();
+               }
+        
+               // 初始化购物车数量（在页面加载时调用一次）
+               updateCartCount(); // 这里可以添加JavaScript代码来处理购物车和结账功能
+        // 例如，更新购物车中的商品数量，计算总价等
+    </script>
+</body>
+</html>
