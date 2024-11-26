@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客房送餐页面</title>
+	<link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+		.overlay {
+		    position: fixed;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background-color: rgba(0, 0, 0, 0.5); /* 半透明遮罩 */
+		    display: none; /* 默认隐藏 */
+		    z-index: 1001; /* 确保在最上层 */
+		}
+
+        .header {
+            position: fixed; /* 添加固定定位 */
+            top: 0; /* 固定在视口顶部 */
+            left: 0; /* 从视口左侧开始 */
+            width: 100%; /* 宽度覆盖整个浏览器窗口 */
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 1000; /* 确保它在其他内容之上（可选） */
+        }
+		
+		#search-box {
+		    position: absolute;
+		    right: 120px;
+		    top: 50%;
+		    transform: translateY(-50%);
+		    padding: 5px;
+		    border: 1px solid #ccc;
+		    border-radius: 4px;
+		}
+		 
+		#search-button {
+		    position: absolute;
+		    right: 60px; /* Adjust based on search-box width and padding */
+		    top: 50%;
+		    transform: translateY(-50%);
+		    padding: 5px 10px;
+		    border: none;
+		    background-color: #a79484;
+		    color: white;
+		    cursor: pointer;
+		    border-radius: 4px;
+			}
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+		
+
+        .header a:hover {
+            text-decoration: underline;
+        }
+
+        .main-content{
+			padding-left: 20px;
+			padding-right: 20px;
+			margin-top: 137px;
+			margin-bottom: 65px;
+		}
+
+        .food-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .food-item img {
+            float: left;
+            margin-right: 60px;
+			margin-left: 40px;
+            width: 100px;
+            height: 150px;
+			object-fit: cover;
+        }
+
+        .food-info {
+            overflow: hidden;
+			width:80%;
+			
+			
+        }
+
+        .food-info h2 {
+            margin: 0 0 10px;
+        }
+
+        .food-info p {
+            margin: 0 0 10px;
+            color: #555;
+        }
+		
+
+        .food-info .price {
+            font-weight: bold;
+            color: #f50;
+			font-size: 30px;
+			width:200px;
+			padding-top: 50px;
+			padding-bottom: 0;
+        }
+
+        .add-to-cart {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .add-to-cart:hover {
+            background-color: #218838;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: right;
+        }
+
+        .cart-summary {
+            display: inline-block;
+            margin-right: 50px;
+        }
+
+        .checkout-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+			margin-right: 35px;
+        }
+
+        .checkout-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 清除浮动 */
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+		.modal {
+		    display: none; /* 默认隐藏 */
+		    position: fixed;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);
+		    width: 60%;
+		    height: 40%;
+		    background-color: white;
+		    border-radius: 10px;
+		    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+		    z-index: 1002; /* 确保在遮罩层之上 */
+		    overflow: auto; /* 如果内容过多，允许滚动 */
+		    padding: 20px;
+		}
+		.modal .pay-button {
+			    position: absolute;
+			    bottom: 20px; /* 根据需要调整距离 */
+			    right: 20px;  /* 根据需要调整距离 */
+			    padding: 10px 20px;
+			    font-size: 18px;
+			    cursor: pointer;
+			    border: none;
+			    border-radius: 5px;
+			    background-color: #ff6347; /* 设置按钮颜色，例如番茄色 */
+			    color: white; /* 设置按钮文字颜色 */
+			    transition: background-color 0.3s ease; /* 添加过渡效果 */
+			}
+			 
+			.modal .pay-button:hover {
+			    background-color: #ff4500; /* 鼠标悬停时改变按钮颜色 */
+			}
+		
+		.modal-content {
+		    text-align: center;
+		}
+		.modal-close {
+		    position: absolute;
+		    top: 10px;
+		    right: 10px;
+		    font-size: 24px;
+		    cursor: pointer;
+		    color: rgba(0, 0, 0, 0.7);
+		}
+    </style>
+</head>
+<body>
+<div class="overlay"></div>
+    <div class="header">
+        <h1>客房叫餐</h1>
+		<input type="text" id="search-box" placeholder="搜索菜品...">
+		    <button id="search-button">搜索</button>
+        <a href="#" class="nav-link" data-target="main-content1">零食</a>
+        <a href="#" class="nav-link" data-target="main-content2">饮料</a>
+        <a href="#" class="nav-link" data-target="main-content3">酒水</a>
+        <a href="#" class="nav-link" data-target="main-content4">牛奶</a>
+        <a href="#" class="nav-link" data-target="main-content5">佳肴</a>
+    </div>
+
+<div class="main-content clearfix" id="main-content1">
+    <div class="main-content1 clearfix">
+        <div class="food-item clearfix">
+            <img src="pt8.jpeg" alt="薯片">
+            <div class="food-info">
+                <h2>薯片</h2>
+                <p>酥脆口感，好吃！</p>
+                <p class="price">¥20</p>
+				<button class="add-to-cart">加购</button>
+                
+            </div>
+        </div>
+        <div class="food-item clearfix">
+            <img src="pt9.jpeg" alt="巧克力">
+            <div class="food-info">
+                <h2>巧克力</h2>
+                <p>醇香浓郁，美味纵享丝滑。</p>
+                <p class="price">¥79</p>
+                <button class="add-to-cart">加购</button>
+            </div>
+        </div>
+	</div>
+	<div class="main-content2 clearfix" id="main-content2">
+		<div class="food-item clearfix">
+		    <img src="pt10.jpeg" alt="可乐">
+		    <div class="food-info">
+		        <h2>可乐</h2>
+		        <p>一口劲爽。</p>
+		        <p class="price">¥15</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+	
+		<div class="food-item clearfix">
+		    <img src="pt11.jpeg" alt="乌龙茶">
+		    <div class="food-info">
+		        <h2>乌龙茶</h2>
+		        <p>健康解腻。</p>
+		        <p class="price">¥15</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+	</div>
+	<div class="main-content3 clearfix" id="main-content3">
+		<div class="food-item clearfix">
+		    <img src="pt12.jpeg" alt="桑格利亚">
+		    <div class="food-info">
+		        <h2>桑格利亚</h2>
+		        <p>入口清甜，微酸，低浓度。</p>
+		        <p class="price">¥169</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+		<div class="food-item clearfix">
+		    <img src="pt13.jpeg" alt="麦卡伦">
+		    <div class="food-info">
+		        <h2>麦卡伦</h2>
+		        <p>入口顺滑，果味浓郁，回甘带有桃子的苦涩和橡木的香气。</p>
+		        <p class="price">¥699</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+	</div>
+	<div class="main-content4 clearfix"  id="main-content4">
+		<div class="food-item clearfix">
+		    <img src="pt14.jpeg" alt="纯牛奶">
+		    <div class="food-info">
+		        <h2>纯牛奶</h2>
+		        <p>质地丝滑，好喝。可加热。</p>
+		        <p class="price">¥20</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+		<div class="food-item clearfix">
+		    <img src="pt15.jpeg" alt="鲜牛奶">
+		    <div class="food-info">
+		        <h2>鲜牛奶</h2>
+		        <p>口感更加凌冽，也好喝。</p>
+		        <p class="price">¥20</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+	</div>
+	<div class="main-content5 clearfix" id="main-content5">
+		<div class="food-item clearfix">
+		    <img src="pt16.jpg" alt="早茶套餐">
+		    <div class="food-info">
+		        <h2>早茶套餐</h2>
+		        <p>种类丰富，非常好吃。</p>
+		        <p class="price">¥299</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+		<div class="food-item clearfix">
+		    <img src="pt17.jpeg" alt="龙虾晚宴">
+		    <div class="food-info">
+		        <h2>龙虾晚宴</h2>
+		        <p>令人垂涎欲滴的龙虾晚宴，鲜嫩多汁，口感敦实的澳龙挤上清新的柠檬汁，酥脆的拿破仑与芝士交相呼应，鲜、甜、酸的极致碰撞，共同打造了味蕾盛宴。</p>
+		        <p class="price">¥1299</p>
+		        <button class="add-to-cart">加购</button>
+		    </div>
+		</div>
+        <!-- 可以继续添加更多的菜品 -->
+    </div>
+</div>
+    <div class="footer">
+            <div class="cart-summary">
+                <span id="cart-count">购物车 (0)</span>
+            </div>
+            <button class="checkout-button" onclick="showModal()">确认购买</button>
+        </div>
+<div class="modal" id="modal">
+	    <button class="pay-button" onclick="pay()">确认购买</button>
+        <div class="modal-close" onclick="closeModal()">&times;</div>
+        <div class="modal-content" id="modal-content">
+            <img src="" alt="" style="width:100%;border-radius:10px 10px 0 0;">
+            <h2></h2>
+            <p></p>
+			<!-- 送达时间选择部分 -->
+			<div class="delivery-time-selection">
+			    <label>
+			        <input type="radio" name="deliveryTime" value="immediate" onclick="showTimePicker(false)"> 立即送达
+			    </label>
+			    <label>
+			        <input type="radio" name="deliveryTime" value="custom" onclick="showTimePicker(true)"> 自定义时间
+			    </label>
+			    <!-- 轮盘选择器（隐藏初始） -->
+			    <div id="timePicker" style="display:none;">
+			        <label for="date">日期:</label>
+			        <select id="date" onchange="populateTimeOptions(this.value)">
+			            <option value="today">今天</option>
+			            <option value="tomorrow">明天</option>
+			        </select>
+			        <br>
+			        <label for="time">时间:</label>
+			        <select id="time">
+			            <!-- 时间选项将动态填充 -->
+			        </select>
+			    </div>
+			</div>
+			</div>
+	    </div>
+		
+    <script>
+		function showModal(title, description, imageSrc) {
+			document.querySelector('.overlay').style.display = 'block'; // 显示遮罩层
+			    	
+		    const modal = document.getElementById('modal');
+			modal.style.display = 'block'; // 显示模态框	
+		    document.querySelector('.modal-content h2').textContent = '选择送达时间';
+		    document.querySelector('.modal-content p').textContent = '请选择您希望的送达时间。';
+		    
+		    // 初始化单选按钮（可选）
+		    document.querySelector('input[type="radio"][value="immediate"]').checked = true;
+		    showTimePicker(false); // 初始隐藏时间选择器
+		    
+		    // 初始化日期选择器并触发时间选项填充
+		    var dateSelect = document.getElementById('date');
+		    dateSelect.value = 'today'; // 设置默认日期
+		    populateTimeOptions(dateSelect.value); // 填充默认时间选项
+			    
+			}
+		function closeModal() {
+		    const modal = document.getElementById('modal');
+		    document.querySelector('.overlay').style.display = 'none'; // 隐藏遮罩层
+		    modal.style.display = 'none'; // 隐藏模态框
+		    
+		}
+		function showTimePicker(show) {
+		    var timePicker = document.getElementById('timePicker');
+		    timePicker.style.display = show ? 'block' : 'none';
+		}
+		
+		function populateTimeOptions(date) {
+		    var timeSelect = document.getElementById('time');
+		    timeSelect.innerHTML = ''; // 清空现有选项
+		
+		    var hours = date === 'today' ? [9, 10, 11, 12, 13, 14, 15, 16, 17, 18] : [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; // 示例时间段
+		    var minutes = [0, 30]; // 每半小时一个选项
+		
+		    hours.forEach(hour => {
+		        minutes.forEach(minute => {
+		            var option = document.createElement('option');
+		            option.value = `${hour}:${minute < 10 ? '0' : ''}${minute}`;
+		            option.textContent = `${hour}:${minute}`;
+		            timeSelect.appendChild(option);
+		        });
+		    });
+		}
+		document.addEventListener('DOMContentLoaded', function() {
+		    var navLinks = document.querySelectorAll('.nav-link');
+		 
+		    navLinks.forEach(function(link) {
+		        link.addEventListener('click', function(event) {
+		            event.preventDefault(); // 阻止默认的链接跳转行为
+		 
+		            var targetId = link.getAttribute('data-target');
+		            var targetElement = document.getElementById(targetId);
+		 
+		            if (targetElement) {
+		                // 使用平滑滚动到目标元素的位置
+		                window.scrollTo({
+		                    top: targetElement.offsetTop - 137, // 减去header的高度（假设为60px），以便内容不被header遮挡
+		                    behavior: 'smooth'
+		                });
+		            }
+		        });
+		    });
+		});
+       document.addEventListener('DOMContentLoaded', function() {
+           const searchBox = document.getElementById('search-box');
+           const searchButton = document.getElementById('search-button');
+        
+           // Function to scroll to the element containing the search keyword
+           function scrollToElement(element) {
+               element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+           }
+        
+           // Handle search button click
+           searchButton.addEventListener('click', function() {
+               const keyword = searchBox.value.trim();
+               if (keyword) {
+                   const h2Elements = document.querySelectorAll('h2');
+                   h2Elements.forEach(h2 => {
+                       if (h2.textContent.toLowerCase().includes(keyword.toLowerCase())) {
+                           scrollToElement(h2);
+                           return false; // Stop searching after finding the first match
+                       }
+                   });
+               }
+           });
+        
+           // Handle Enter key press in the search box
+           searchBox.addEventListener('keypress', function(event) {
+               if (event.key === 'Enter') {
+                   searchButton.click();
+               }
+           });
+       });
+	   function pay() {
+	       
+	   }
+    </script>
+</body>
+</html>
